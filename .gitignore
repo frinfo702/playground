@@ -1,4 +1,7 @@
 **/__pycache__
 *.csv
 *.zip
-metals/
+.bsp/
+.metals/
+.scala-build
+.claude
