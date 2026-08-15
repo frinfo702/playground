@@ -5,3 +5,5 @@
 .metals/
 .scala-build
 .claude
+node_modules/
+sampledata.archive
