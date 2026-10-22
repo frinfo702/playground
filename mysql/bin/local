@@ -1,0 +1,26 @@
+#!/usr/bin/env bash
+# Local mysqld (Homebrew mysql@8.4) with its own datadir in ./data/local, on port 3307.
+# Usage: bin/local init|start|stop|reset
+set -euo pipefail
+root="$(cd "$(dirname "$0")/.." && pwd)"
+dir="$root/data/local"
+PATH="$(brew --prefix mysql@8.4)/bin:$PATH"
+args=(--defaults-file="$root/conf/my.cnf" --datadir="$dir/db" --port=3307 --mysqlx=OFF
+      --socket="$dir/mysqld.sock" --pid-file="$dir/mysqld.pid" --log-error="$dir/error.log")
+admin=(mysqladmin -h127.0.0.1 -P3307 -uroot)
+
+case "${1:-}" in
+  init)
+    mkdir -p "$dir"
+    mysqld "${args[@]}" --initialize-insecure
+    "$0" start
+    { echo "CREATE DATABASE playground; USE playground;"; cat "$root"/init/*.sql; } \
+      | mysql -h127.0.0.1 -P3307 -uroot
+    echo "ready: TARGET=local bin/sql" ;;
+  start)
+    nohup mysqld "${args[@]}" >/dev/null 2>&1 &
+    until "${admin[@]}" ping --silent 2>/dev/null; do sleep 0.5; done ;;
+  stop)  "${admin[@]}" shutdown ;;
+  reset) "$0" stop 2>/dev/null || true; rm -rf "$dir"; "$0" init ;;
+  *) echo "usage: $0 init|start|stop|reset" >&2; exit 1 ;;
+esac

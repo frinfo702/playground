@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+# MySQL client for the playground DB. Extra args go to `mysql`.
+#   bin/sql                      interactive shell
+#   bin/sql -e 'SELECT 1'        one-off query
+#   bin/sql < experiments/x.sql  run a file
+# TARGET=local talks to the local server (bin/local) instead of the container.
+set -euo pipefail
+root="$(cd "$(dirname "$0")/.." && pwd)"
+if [[ "${TARGET:-docker}" == local ]]; then
+  PATH="$(brew --prefix mysql@8.4)/bin:$PATH"
+  exec mysql -h127.0.0.1 -P3307 -uroot --table playground "$@"
+fi
+tty=(-T); [[ -t 0 && -t 1 ]] && tty=()
+exec docker compose -f "$root/compose.yaml" exec "${tty[@]}" -e MYSQL_PWD=root mysql \
+  mysql -uroot --table playground "$@"
