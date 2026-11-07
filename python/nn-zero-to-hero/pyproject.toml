@@ -1,0 +1,17 @@
+[project]
+name = "nn-zero-to-hero"
+version = "0.1.0"
+description = "Karpathy's neural network course"
+readme = "README.md"
+authors = [
+    { name = "Kenichiro Goto", email = "kenichiro3114@gmail.com" }
+]
+requires-python = ">=3.13"
+dependencies = []
+
+[project.scripts]
+nn-zero-to-hero = "nn_zero_to_hero:main"
+
+[build-system]
+requires = ["uv_build>=0.13.1,<0.14.0"]
+build-backend = "uv_build"
